@@ -1,6 +1,6 @@
 """
-Convert a portrait photo into a CLEAN, monochrome ASCII-art SVG (Andrew6rant
-style: one light-gray color, subject isolated on a dark background) that "types"
+Convert source artwork into a clean, monochrome ASCII-art SVG (one light-gray
+color, subject isolated on a dark background) that "types"
 itself in like a terminal, then holds.
 
 Monochrome is deliberate -- per-character rainbow color is what makes ASCII
@@ -23,22 +23,28 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "source-prepped.png")
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "..", "john-ascii.svg")
 
-# more columns = more detail (eyes need ~6+ chars across to read). the art
-# stays ART_W px wide either way; cells shrink, keeping a ~1:1.875 char aspect.
-COLS = int(os.environ.get("COLS", 180))
+# The bold logo reads more clearly at README-card size with fewer, larger
+# characters. The art stays ART_W px wide; cells keep a ~1:1.875 aspect.
+COLS = int(os.environ.get("COLS", 105))
 ART_W_TARGET = 800
 CELL_W = ART_W_TARGET / COLS
 CELL_H = CELL_W * 15 / 8
 ROWS = round(COLS * 8 / 15)
-RAMP = " .`:-=+*cs#%@"  # bright(sparse) -> dark(dense); leading space clears bg
+RAMP = os.environ.get("ASCII_RAMP", " .:-=+*#%@")
 
-# the prepped image already has bg removed + CLAHE local contrast, so only
-# light global tuning is needed here.
-CONTRAST = 1.05
-BRIGHTNESS = 1.0
-GAMMA = 1.18          # >1 brightens mids -> face lands in sparser chars
+# The prepped image already has its background removed and uses deliberately
+# soft tonal normalization, so only light global tuning is needed here.
+CONTRAST = float(os.environ.get("ASCII_CONTRAST", 1.0))
+BRIGHTNESS = float(os.environ.get("ASCII_BRIGHTNESS", 1.05))
+GAMMA = float(os.environ.get("ASCII_GAMMA", 0.85))
 SHARPEN = False
-WHITE_FLOOR = 0.80    # luminance above this is forced to blank (space)
+WHITE_FLOOR = float(os.environ.get("ASCII_WHITE_FLOOR", 0.995))
+ALPHA_FLOOR = float(os.environ.get("ASCII_ALPHA_FLOOR", 0.08))
+# On a dark terminal, light source pixels should use denser light characters.
+# Mapping dark pixels to dense characters creates a photographic negative and
+# makes pale faces look like empty eye sockets. Set ASCII_INVERT_TONES=0 only
+# when rendering dark text onto a light background.
+INVERT_TONES = os.environ.get("ASCII_INVERT_TONES", "1") != "0"
 
 PAD = 20
 TITLEBAR_H = 30
@@ -60,13 +66,17 @@ ROW_DUR = 5.8 / ROWS  # whole portrait prints in ~6s at any resolution
 STAGGER = ROW_DUR       # == ROW_DUR -> a single cursor sweeping down
 
 # ---- 1. sample the image into a COLS x ROWS grayscale grid ----------------
-im = Image.open(SRC).convert("L")               # grayscale
+source = Image.open(SRC).convert("RGBA")
+alpha = source.getchannel("A")
+im = ImageOps.grayscale(source)
 if SHARPEN:
     im = im.filter(ImageFilter.UnsharpMask(radius=2, percent=140, threshold=2))
 im = ImageEnhance.Brightness(im).enhance(BRIGHTNESS)
 im = ImageEnhance.Contrast(im).enhance(CONTRAST)
 im = im.resize((COLS, ROWS), Image.LANCZOS)
+alpha = alpha.resize((COLS, ROWS), Image.LANCZOS)
 px = im.load()
+alpha_px = alpha.load()
 
 STATIC = bool(os.environ.get("STATIC"))  # emit frozen state for previews
 
@@ -74,12 +84,17 @@ rows_txt = []
 for y in range(ROWS):
     chars = []
     for x in range(COLS):
-        lum = px[x, y] / 255.0
-        lum = pow(lum, GAMMA)
-        if lum >= WHITE_FLOOR:
+        coverage = alpha_px[x, y] / 255.0
+        if coverage < ALPHA_FLOOR:
             chars.append(" ")
             continue
-        idx = int((1.0 - lum) * (len(RAMP) - 1) + 0.5)
+        lum = px[x, y] / 255.0
+        lum = pow(lum, GAMMA)
+        if not INVERT_TONES and lum >= WHITE_FLOOR:
+            chars.append(" ")
+            continue
+        density = (lum if INVERT_TONES else 1.0 - lum) * coverage
+        idx = int(density * (len(RAMP) - 1) + 0.5)
         idx = max(0, min(len(RAMP) - 1, idx))
         chars.append(RAMP[idx])
     rows_txt.append("".join(chars))
@@ -106,7 +121,7 @@ parts.append(f'<line x1="0" y1="{TITLEBAR_H}" x2="{CANVAS_W}" y2="{TITLEBAR_H}" 
 for i, dotcol in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]):
     parts.append(f'<circle cx="{PAD + i*16}" cy="{TITLEBAR_H/2}" r="5" fill="{dotcol}"/>')
 parts.append(f'<text x="{CANVAS_W/2}" y="{TITLEBAR_H/2 + 4}" fill="{TITLE_TEXT}" font-size="12" '
-             f'text-anchor="middle">john@github: ~$ ./portrait.sh</text>')
+             f'text-anchor="middle">john@github: ~$ ./gators.sh</text>')
 
 # one <text> per row (single color -> no per-char markup, tiny file)
 font_size = CELL_H * 0.86
@@ -141,8 +156,8 @@ status_line_y = TITLEBAR_H + ART_H + PAD * 0.35
 status_y = status_line_y + 19
 parts.append(f'<line x1="0" y1="{status_line_y:.1f}" x2="{CANVAS_W}" y2="{status_line_y:.1f}" stroke="{FRAME}"/>')
 parts.append(f'<text x="{PAD}" y="{status_y:.1f}" fill="{TITLE_TEXT}" font-size="13">'
-             f'john@github:~$ whoami <tspan fill="{INK}">John Riley</tspan></text>')
-status_chars = len("john@github:~$ whoami John Riley ")   # cursor sits after the name
+             f'john@github:~$ mascot <tspan fill="{INK}">Florida Gators</tspan></text>')
+status_chars = len("john@github:~$ mascot Florida Gators ")
 parts.append(f'<rect x="{PAD + status_chars * 13 * 0.6:.1f}" y="{status_y-12:.1f}" width="8" height="14" fill="{INK}">'
              f'<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.51;1" '
              f'dur="1s" repeatCount="indefinite"/></rect>')

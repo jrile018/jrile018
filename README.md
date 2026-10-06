@@ -1,54 +1,37 @@
 <div align="center">
 
-<!-- Animated contribution graph: real jrile018 data, refreshed daily by
-     .github/workflows/update-profile-art.yml. -->
+<h1>John Riley</h1>
 
-<h3><code>john@github ~ $ ./contributions.sh</code></h3>
+<p>Building low-latency systems, quantitative models, and agentic software.</p>
 
-<img src="./contrib-heatmap.svg" width="860" alt="John Riley's GitHub contribution graph — auto-refreshed daily" />
+<p>
+  <a href="#featured-project">Lattice</a> ·
+  <a href="#open-source">Open source</a> ·
+  <a href="https://github.com/jrile018?tab=repositories">All repositories</a>
+</p>
+
+<p><b>Computer Engineering + Mathematics @ the University of Florida</b></p>
 
 <br>
 <br>
 
 <!-- Both SVGs are 840x880, so equal widths produce equal heights.
-     Portrait: python scripts/prep_photo.py source-photo.png source-prepped.png
+     Artwork:  python scripts/prep_photo.py source-gator.jpg source-prepped.png
                && python scripts/make_ascii_svg.py source-prepped.png john-ascii.svg
      Stats:    python scripts/render_stats_svg.py -->
 
-<h3><code>john@github ~ $ whoami</code></h3>
+<h3><code>john@github ~ $ ./gators.sh</code></h3>
 
 <table>
 <tr>
-<td valign="top"><img src="./john-ascii.svg" width="420" alt="John Riley — animated ASCII portrait" /></td>
+<td valign="top"><img src="./john-ascii.svg" width="420" alt="Florida Gators logo — animated ASCII art" /></td>
 <td valign="top"><img src="./stats.svg" width="420" alt="John Riley's GitHub streak and contribution stats — auto-refreshed daily" /></td>
 </tr>
 </table>
 
-<br>
-<br>
-
-<h3><code>john@github ~ $ ./links.sh</code></h3>
-
-<p><b>Computer Engineering + Mathematics @ the University of Florida</b></p>
-
-[![Repositories](https://img.shields.io/badge/GitHub-All_repositories-0d1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/jrile018?tab=repositories)
-[![X](https://img.shields.io/badge/X-JohnRiley650659-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/JohnRiley650659)
-
 </div>
 
 ---
-
-<h1 align="center">John Riley</h1>
-
-<p align="center">
-  Building low-latency systems, quantitative models, and agentic software.
-</p>
-
-<p align="center">
-  <a href="#featured-project">Lattice</a> ·
-  <a href="#open-source">Open source</a> ·
-  <a href="https://github.com/jrile018?tab=repositories">All repositories</a>
-</p>
 
 ## Current focus
 
@@ -102,3 +85,12 @@ research meet.
 <p align="center">
   <a href="https://github.com/jrile018?tab=repositories">Explore more of my work →</a>
 </p>
+
+<div align="center">
+
+<h3><code>john@github ~ $ ./links.sh</code></h3>
+
+[![Repositories](https://img.shields.io/badge/GitHub-All_repositories-0d1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/jrile018?tab=repositories)
+[![X](https://img.shields.io/badge/X-JohnRiley650659-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/JohnRiley650659)
+
+</div>
