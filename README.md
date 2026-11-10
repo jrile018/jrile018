@@ -15,13 +15,6 @@
 <br>
 <br>
 
-<!-- Both SVGs are 840x880, so equal widths produce equal heights.
-     Artwork:  python scripts/prep_photo.py source-gator.jpg source-prepped.png
-               && python scripts/make_ascii_svg.py source-prepped.png john-ascii.svg
-     Stats:    python scripts/render_stats_svg.py -->
-
-<h3><code>john@github ~ $ ./gators.sh</code></h3>
-
 <table>
 <tr>
 <td valign="top"><img src="./john-ascii.svg" width="420" alt="Florida Gators logo — animated ASCII art" /></td>
